@@ -9,3 +9,4 @@ nick1: asdasdas
 nick5: qwe
 nick1: kek
 nick2: bamb
+для nick1: HI

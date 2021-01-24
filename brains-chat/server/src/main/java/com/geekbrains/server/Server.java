@@ -6,11 +6,14 @@ import java.net.Socket;
 import java.util.Vector;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Server {
     private Vector<ClientHandler> clients;
     private AuthService authService;
     private ExecutorService executorService;
+    public Logger logger = Logger.getLogger(MainServer.class.getName());
 
     public AuthService getAuthService() {
         return authService;
@@ -22,18 +25,19 @@ public class Server {
         executorService = Executors.newCachedThreadPool();
 
         try (ServerSocket serverSocket = new ServerSocket(8189)) {
-            System.out.println("Сервер запущен на порту 8189");
+            logger.log(Level.INFO, "Сервер запущен на порту " + serverSocket.getLocalPort());
             while (true) {
                 Socket socket = serverSocket.accept();
                 new ClientHandler(this, socket, executorService);
-                System.out.println("Подключился новый клиент");
+
             }
         } catch (IOException e) {
+            logger.log(Level.WARNING, "Произошла ошибка запуска сервера");
             e.printStackTrace();
         } finally {
             executorService.shutdown();
         }
-        System.out.println("Сервер завершил свою работу");
+        logger.log(Level.INFO, "Сервер завершил работу");
     }
 
     public void broadcastMsg(String msg) {

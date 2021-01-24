@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class ClientHandler {
     private String nickname;
@@ -13,6 +15,7 @@ public class ClientHandler {
     private Socket socket;
     private DataInputStream in;
     private DataOutputStream out;
+    public Logger logger = Logger.getLogger(MainServer.class.getName());
 
 
     public String getNickname() {
@@ -39,7 +42,10 @@ public class ClientHandler {
                                 sendMsg("/authok " + nick);
                                 nickname = nick;
                                 server.subscribe(this);
+                                logger.log(Level.INFO, "Подключился новый клиент " + nickname);
                                 break;
+                            } else {
+                                logger.log(Level.INFO, "Ошибка,клиент " + tokens[1] + " не смог подключиться");
                             }
                         }
                     }
@@ -48,14 +54,17 @@ public class ClientHandler {
                         if(msg.startsWith("/")) {
                             if (msg.equals("/end")) {
                                 sendMsg("/end");
+                                logger.log(Level.INFO, "Клиент " + nickname + " отключился");
                                 break;
                             }
                             if(msg.startsWith("/w ")) {
                                 String[] tokens = msg.split("\\s", 3);
                                 server.privateMsg(this, tokens[1], tokens[2]);
+                                logger.log(Level.INFO, "Клиент " + nickname + " выслал личное сообщение");
                             }
                         } else {
                             server.broadcastMsg(nickname + ": " + msg);
+                            logger.log(Level.INFO, "Клиент " + nickname + " выслал сообщение");
                         }
                     }
                 } catch (IOException e) {
